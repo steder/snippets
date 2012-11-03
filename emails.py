@@ -24,7 +24,7 @@ class ReminderEmail(webapp.RequestHandler):
 
 class OneReminderEmail(webapp.RequestHandler):
     def post(self):
-        mail.send_mail(sender="snippets <snippets@fssnippets.appspotmail.com>",
+        mail.send_mail(sender="snippets <snippets@snippetless.appspotmail.com>",
                        to=self.request.get('email'),
                        subject="Snippet time!",
                        body=REMINDER)
@@ -37,11 +37,11 @@ class DigestEmail(webapp.RequestHandler):
         all_users = User.all().filter("enabled =", True).fetch(500)
         for user in all_users:
             taskqueue.add(url='/onedigest', params={'email': user.email})
-            
+
 
 class OneDigestEmail(webapp.RequestHandler):
     def __send_mail(self, recipient, body):
-        mail.send_mail(sender="snippets <snippets@fssnippets.appspotmail.com>",
+        mail.send_mail(sender="snippets <snippets@snippetless.appspotmail.com>",
                        to=recipient,
                        subject="Snippet delivery!",
                        body=body)
@@ -62,6 +62,6 @@ class OneDigestEmail(webapp.RequestHandler):
         logging.info(all_snippets)
         body = '\n\n\n'.join([self.__snippet_to_text(s) for s in all_snippets if s.user.email in following])
         if body:
-            self.__send_mail(user.email, 'https://fssnippets.appspot.com\n\n' + body)
+            self.__send_mail(user.email, 'https://snippetless.appspot.com\n\n' + body)
         else:
             logging.info(user.email + ' not following anybody.')

@@ -1,16 +1,16 @@
-application: fssnippets
+application: snippetless
 version: 1
 runtime: python
 api_version: 1
 
 handlers:
-- url: /_ah/mail/snippets@.*fssnippets\.appspotmail\.com 
+- url: /_ah/mail/snippets@.*snippetless\.appspotmail\.com
   script: receive_email.py
   login: admin
 
 - url: .*
   script: main.py
   secure: always
-    
+
 inbound_services:
 - mail
