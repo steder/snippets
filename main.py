@@ -14,18 +14,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import functools
+import logging
 import os
+import urllib
 
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import util
 
-from emails import *
-from model import *
+from emails import (DigestEmail,
+                    OneDigestEmail,
+                    OneReminderEmail,
+                    ReminderEmail)
+from dateutil import date_for_retrieval
+from model import (compute_following,
+                   Snippet,
+                   User,
+                   user_from_email)
 
-import functools
-import urllib
 
 def authenticated(method):
     @functools.wraps(method)
@@ -52,12 +60,12 @@ class BaseHandler(webapp.RequestHandler):
         else:
             userObj = userObj[0]
         return userObj
-    
+
     def render(self, template_name, template_values):
         #self.response.headers['Content-Type'] = 'text/html'
         path = os.path.join(os.path.dirname(__file__), 'templates/%s.html' % template_name)
         self.response.out.write(template.render(path, template_values))
-        
+
 
 class UserHandler(BaseHandler):
     """Show a given user's snippets."""
@@ -69,9 +77,9 @@ class UserHandler(BaseHandler):
         desired_user = user_from_email(email)
         snippets = desired_user.snippet_set
         snippets = sorted(snippets, key=lambda s: s.date, reverse=True)
-        following = email in user.following 
+        following = email in user.following
         tags = [(t, t in user.tags_following) for t in desired_user.tags]
-         
+
         template_values = {
                            'current_user' : user,
                            'user': desired_user,
@@ -90,14 +98,14 @@ class FollowHandler(BaseHandler):
         desired_tag = self.request.get('tag')
         desired_user = self.request.get('user')
         continue_url = self.request.get('continue')
-        
+
         if desired_tag and (desired_tag not in user.tags_following):
             user.tags_following.append(desired_tag)
             user.put()
         if desired_user and (desired_user not in user.following):
             user.following.append(desired_user)
             user.put()
-            
+
         self.redirect(continue_url)
 
 
@@ -109,16 +117,16 @@ class UnfollowHandler(BaseHandler):
         desired_tag = self.request.get('tag')
         desired_user = self.request.get('user')
         continue_url = self.request.get('continue')
-        
+
         if desired_tag and (desired_tag in user.tags_following):
             user.tags_following.remove(desired_tag)
             user.put()
         if desired_user and (desired_user in user.following):
             user.following.remove(desired_user)
             user.put()
-            
+
         self.redirect(continue_url)
-        
+
 
 class TagHandler(BaseHandler):
     """View this week's snippets in a given tag."""
@@ -139,7 +147,7 @@ class TagHandler(BaseHandler):
                            }
         self.render('tag', template_values)
 
-    
+
 class MainHandler(BaseHandler):
     """Show list of all users and acting user's settings."""
 
@@ -160,7 +168,7 @@ class MainHandler(BaseHandler):
         if tags:
             user.tags = [s.strip() for s in tags.split(',')]
             user.put()
-            
+
         # Fetch user list and display
         raw_users = User.all().order('email').fetch(500)
         following = compute_following(user, raw_users)
@@ -169,16 +177,17 @@ class MainHandler(BaseHandler):
         for u in raw_users:
             all_tags.update(u.tags)
         all_tags = [(t, t in user.tags_following) for t in all_tags]
-        
+
         template_values = {
                            'current_user' : user,
                            'all_users': all_users,
-                           'all_tags': all_tags                           
+                           'all_tags': all_tags
                            }
         self.render('index', template_values)
 
 
 def main():
+    logging.getLogger().setLevel(logging.DEBUG)
     application = webapp.WSGIApplication(
                                          [('/', MainHandler),
                                           ('/user/(.*)', UserHandler),

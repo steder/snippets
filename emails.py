@@ -3,10 +3,13 @@ import logging
 from google.appengine.api import mail
 from google.appengine.api import taskqueue
 from google.appengine.ext import webapp
-from google.appengine.ext.webapp import util
+#from google.appengine.ext.webapp import util
 
-from dateutil import *
-from model import *
+from dateutil import date_for_retrieval
+from model import (compute_following,
+                   Snippet,
+                   user_from_email,
+                   User)
 
 REMINDER = """
 Hey nerd,
@@ -30,7 +33,7 @@ class OneReminderEmail(webapp.RequestHandler):
                        body=REMINDER)
 
     def get(self):
-        post(self)
+        self.post()
 
 class DigestEmail(webapp.RequestHandler):
     def get(self):
@@ -51,7 +54,7 @@ class OneDigestEmail(webapp.RequestHandler):
         return '%s\n%s\n%s' % (snippet.user.pretty_name(), divider, snippet.text)
 
     def get(self):
-        post(self)
+        self.post()
 
     def post(self):
         user = user_from_email(self.request.get('email'))

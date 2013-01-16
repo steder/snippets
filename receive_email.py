@@ -1,6 +1,6 @@
-import datetime
+#import datetime
 import email
-import logging
+#import logging
 import re
 
 from google.appengine.ext import webapp
@@ -38,5 +38,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
