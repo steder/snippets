@@ -49,13 +49,18 @@ def authenticated(method):
 
 class BaseHandler(webapp.RequestHandler):
     def get_user(self):
-        '''Returns the user object on authenticated requests'''
+        '''Returns the user object on authenticated requests
+
+        This constructs the user if it doesn't exist yet.
+        '''
         user = users.get_current_user()
         assert user
 
-        userObj = User.all().filter("email =", user.email()).fetch(1)
+        email = user.email().lower()
+        logging.debug("email = %s (%s)", user.email(), email)
+        userObj = User.all().filter("email =", email).fetch(1)
         if not userObj:
-            userObj = User(email=user.email())
+            userObj = User(email=email)
             userObj.put()
         else:
             userObj = userObj[0]

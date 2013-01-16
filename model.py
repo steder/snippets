@@ -31,6 +31,7 @@ def compute_following(current_user, users):
     return following
 
 def user_from_email(email):
+    email = email.lower()
     logging.debug('looking up user with email %s', email)
     return User.all().filter("email =", email).fetch(1)[0]
 
