@@ -12,7 +12,7 @@ from model import (compute_following,
                    User)
 
 REMINDER = """
-Hey nerd,
+Hey digipal,
 
 The kids want to know what you're up to. Don't leave 'em hanging.
 """
