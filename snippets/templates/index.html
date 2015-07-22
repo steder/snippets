@@ -13,7 +13,7 @@
     {% endif %}
     <form action="/" method="get">
 
-    my tags <input name="tags" type="text" value="{{ current_user.tags|join:"," }}"/></form>
+    my tags <input name="tags" type="text" value="{{ current_user.tags|join(",") }}"/></form>
 
     </td></tr></table>
     <br/>
