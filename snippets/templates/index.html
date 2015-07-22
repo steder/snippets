@@ -25,11 +25,11 @@
         <td valign="top">
 			    <h3>Users</h3>
 			    {% for user in all_users %}
-			      <a href="/user/{{ user.0.email }}">{{ user.0.pretty_name }}</a>
+			      <a href="/user/{{ user.email }}">{{ user.pretty_name }}</a>
 			      {% if user.1 %}
-			        ✓ <a class="light" href="/unfollow?user={{ user.0.email }}&continue=/">unfollow</a>
+			        ✓ <a class="light" href="/unfollow?user={{ user.email }}&continue=/">unfollow</a>
 			      {% else %}
-			        <a class="light" href="/follow?user={{ user.0.email }}&continue=/">follow</a>
+			        <a class="light" href="/follow?user={{ user.email }}&continue=/">follow</a>
 			      {% endif %}
 			      <br/>
 			    {% endfor %}
@@ -37,11 +37,11 @@
 				 <td valign="top">
   			   <h3>Tags</h3>
 	 		     {% for tag in all_tags %}
-			       <a href="/tag/{{ tag.0 }}">{{ tag.0 }}</a>
+			       <a href="/tag/{{ tag }}">{{ tag }}</a>
 			       {% if tag.1 %}
-			         ✓ <a class="light" href="/unfollow?tag={{ tag.0 }}&continue=/">unfollow</a>
+			         ✓ <a class="light" href="/unfollow?tag={{ tag }}&continue=/">unfollow</a>
 			       {% else %}
-			         <a class="light" href="/follow?tag={{ tag.0 }}&continue=/">follow</a>
+			         <a class="light" href="/follow?tag={{ tag }}&continue=/">follow</a>
 		        {% endif %}
 		        <br/>
 		      {% endfor %}
