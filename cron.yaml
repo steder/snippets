@@ -1,9 +1,0 @@
-cron:
-- description: reminder
-  url: /reminderemail
-  schedule: every day 7:00
-  timezone: America/Chicago
-- description: digest
-  url: /digestemail
-  schedule: every day 19:00
-  timezone: America/Chicago
