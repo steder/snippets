@@ -13,7 +13,7 @@
     {% endif %}
     <form action="/" method="get">
 
-    my tags <input name="tags" type="text" value="{{ current_user.tags|join(",") }}"/></form>
+    my tags <input name="tags" type="text" placeholder="Enter comma separator tags here" value="{{ current_user.tags and current_user.tags|join(",") or '' }}"/></form>
 
     </td></tr></table>
     <br/>
@@ -24,9 +24,9 @@
       <tr>
         <td valign="top">
 			    <h3>Users</h3>
-			    {% for user in all_users %}
-			      <a href="/user/{{ user.email }}">{{ user.pretty_name }}</a>
-			      {% if user.1 %}
+			    {% for user, following in all_users %}
+			      <a href="/user/{{ user.email }}">{{ user.username }}</a>
+			      {% if following %}
 			        ✓ <a class="light" href="/unfollow?user={{ user.email }}&continue=/">unfollow</a>
 			      {% else %}
 			        <a class="light" href="/follow?user={{ user.email }}&continue=/">follow</a>
@@ -36,9 +36,9 @@
 		     </td>
 				 <td valign="top">
   			   <h3>Tags</h3>
-	 		     {% for tag in all_tags %}
+	 		     {% for tag, following in all_tags %}
 			       <a href="/tag/{{ tag }}">{{ tag }}</a>
-			       {% if tag.1 %}
+			       {% if following %}
 			         ✓ <a class="light" href="/unfollow?tag={{ tag }}&continue=/">unfollow</a>
 			       {% else %}
 			         <a class="light" href="/follow?tag={{ tag }}&continue=/">follow</a>
