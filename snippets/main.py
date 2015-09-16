@@ -22,11 +22,7 @@ from sqlalchemy.ext.mutable import Mutable
 #                     OneDigestEmail,
 #                     OneReminderEmail,
 #                     ReminderEmail)
-# from dateutil import date_for_retrieval
-# from model import (compute_following,
-#                    Snippet,
-#                    User,
-#                    user_from_email)
+from dateutil import date_for_retrieval
 
 
 app = Flask(__name__)
@@ -65,6 +61,8 @@ class User(db.Model):
     tags = db.Column(MutableList.as_mutable(postgresql.ARRAY(db.String())), default=[])
     tags_following = db.Column(MutableList.as_mutable(postgresql.ARRAY(db.String())), default=[])
 
+    snippets = db.relationship('Snippet', backref='author', lazy='dynamic')
+
     def __init__(self, username, email):
         self.username = username
         self.email = email
@@ -73,10 +71,13 @@ class User(db.Model):
         return '<User %r>' % self.username
 
 
-# class Snippet(db.Model):
-#     user = db.ReferenceProperty(User)
-#     text = db.TextProperty()
-#     date = db.DateProperty()
+class Snippet(db.Model):
+    __tablename__ = "snippets"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    text = db.Column(db.Text())
+    date = db.Column(db.DateTime())
 
 
 def get_user(request):
@@ -100,11 +101,12 @@ def compute_following(current_user, users):
     print "following:", following
     return following
 
-#
-# def user_from_email(email):
-#     email = email.lower()
-#     logging.debug('looking up user with email %s', email)
-#     return User.all().filter("email =", email).fetch(1)[0]
+
+def user_from_email(email):
+    email = email.lower()
+    logging.debug('looking up user with email %s', email)
+    return User.query.filter_by(email=email).first()
+
 #
 #
 # def create_or_replace_snippet(user, text, date):
@@ -204,14 +206,14 @@ def unfollow():
     return redirect(continue_url)
 
 
-@app.route("/foobar")
+@app.route("/user/<email>")
 def user_snippets(email):
     """Show a given user's snippets."""
 
     user = get_user(request)
     email = urllib.unquote_plus(email)
     desired_user = user_from_email(email)
-    snippets = desired_user.snippet_set
+    snippets = desired_user.snippets
     snippets = sorted(snippets, key=lambda s: s.date, reverse=True)
     following = email in user.following
     tags = [(t, t in user.tags_following) for t in desired_user.tags]
@@ -223,27 +225,26 @@ def user_snippets(email):
         'following': following,
         'tags': tags
     }
-    render_template('user.html', **template_values)
+    return render_template('user.html', **template_values)
 
 
-# class TagHandler(BaseHandler):
-#     """View this week's snippets in a given tag."""
-#     @authenticated
-#     def get(self, tag):
-#         user = self.get_user()
-#         d = date_for_retrieval()
-#         all_snippets = Snippet.all().filter("date =", d).fetch(500)
-#         if (tag != 'all'):
-#             all_snippets = [s for s in all_snippets if tag in s.user.tags]
-#         following = tag in user.tags_following
 
-#         template_values = {
-#                            'current_user' : user,
-#                            'snippets': all_snippets,
-#                            'following': following,
-#                            'tag': tag
-#                            }
-#         self.render('tag', template_values)
+@app.route("/tag/<tag>")
+def tag_snippets(tag):
+    """View this week's snippets in a given tag."""
+    user = get_user(request)
+    d = date_for_retrieval()
+    all_snippets = Snippet.query.filter_by(date=d).limit(500)
+    if (tag != 'all'):
+        all_snippets = [s for s in all_snippets if tag in s.user.tags]
+    following = tag in user.tags_following
+    template_values = {
+         'current_user' : user,
+         'snippets': all_snippets,
+         'following': following,
+         'tag': tag
+    }
+    return render_template('tag.html', **template_values)
 
 
 # def main():
