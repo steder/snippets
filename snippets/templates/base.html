@@ -1,15 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/bootstrap-tokenfield/dist/css/bootstrap-tokenfield.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/bootstrap-tokenfield/dist/css/tokenfield-typeahead.css') }}">
+
     <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.js') }}"></script>
     <script src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='bower_components/bootstrap-tokenfield/dist/bootstrap-tokenfield.js') }}"></script>
+
     <title>{% block title %}snippets{% endblock %}</title>
+
 </head>
 
 <body>
-  <h1><a class="light" style="color: #2398C9" href="/">snippets</a></h1>
-  {% block body %}
-  {% endblock %}
+  <div class="container-fluid">
+      <h1>
+          <a class="text-muted" href="/">snippets</a>
+      </h1>
+      <div class="col-sm-12">
+          {% block body %}
+          {% endblock %}
+      </div>
+  </div>
 </body>
 </html>
