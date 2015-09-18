@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <style>
-    body.x { font-family: Courier New, monospaced; }
-    body {font-family: Helvetica; }
-    a.light { color: #AAA; text-decoration: none }
-    a.light:hover { text-decoration: underline }
-  </style>
-   <title>{% block title %}snippets{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.css') }}">
+    <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.js') }}"></script>
+    <title>{% block title %}snippets{% endblock %}</title>
 </head>
 
 <body>
