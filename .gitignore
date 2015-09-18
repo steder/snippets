@@ -56,3 +56,12 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Bower Managed Deps:
+snippets/static/bower_components/
+
+# NPM shenanigans:
+node_modules/
+
+# intellij junks
+.idea
