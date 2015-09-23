@@ -247,6 +247,24 @@ def tag_snippets(tag):
     return render_template('tag.html', **template_values)
 
 
+@app.route("/snippets")
+def show_snippets():
+    user = get_user(request)
+
+    a_week_ago, now = arrow.utcnow().span("week")
+    all_snippets = Snippet.query.filter(Snippet.date < now).filter(Snippet.date >= a_week_ago).limit(500)
+    all_users = User.query.limit(500)
+    following = compute_following(user, all_users)
+    logging.info(all_snippets)
+    following_snippets = [s for s in all_snippets if s.user.email in following]
+
+    template_values = {
+        "current_user": user,
+        "following_snippets": following_snippets,
+    }
+    return render_template("snippet_digest.html", **template_values)
+
+
 @app.route("/snippets", methods=("POST",))
 @commit
 def create_snippet():

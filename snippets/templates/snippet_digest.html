@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+    <div class="row">
+    <div class="col-sm-12">
+        <h2><a href="/user/{{ current_user.email }}">{{ current_user.username }}</a></h2>
+        <p>
+            This page acts as an example of what content would be included in the generated digest e-mail.
+        </p>
+        <ul>
+
+        {% for snippet in following_snippets %}
+            <li>
+                {{ snippet.text }} <b>{{ snippet.user.username }}</b> <i>{{ snippet.date|timesince }}</i>
+            </li>
+        {% else %}
+            <li>
+            <p>You don't appear to be following anyone.</p>
+            <p>Sorry, {{ current_user.username }}!</p>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    </div>
+{% endblock %}

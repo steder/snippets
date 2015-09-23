@@ -3,7 +3,7 @@
 {% block body %}
 
     <div class="row">
-        <h2><a href="/user/{{ current_user.email }}">{{ current_user.pretty_name }}</a></h2>
+        <h2><a href="/user/{{ current_user.email }}">{{ current_user.username }}</a></h2>
         currently
         {% if current_user.enabled %}
             enabled (<a class="light" href="?setenabled=0">disable</a>)
@@ -35,6 +35,11 @@
     <div class="row">
         <div class="col-sm-12">
             send your snippets to snippets@snippetless.appspotmail.com daily!
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            Preview your <a href="/snippets">digest</a>
         </div>
     </div>
 
