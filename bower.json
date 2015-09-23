@@ -1,0 +1,21 @@
+{
+  "name": "Snippets",
+  "version": "1.0.0",
+  "homepage": "https://github.com/steder/snippets",
+  "authors": [
+    "Mike Steder <steder@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "snippets/static/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.5",
+    "bootstrap-tokenfield": "~0.12.1",
+    "jquery": "~2.1.4"
+  }
+}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+    <div class="row">
+        <h2><a href="/user/{{ current_user.email }}">{{ current_user.username }}</a></h2>
+        currently
+        {% if current_user.enabled %}
+            enabled (<a class="light" href="?setenabled=0">disable</a>)
+        {% else %}
+            disabled (<a class="light" href="?setenabled=1">enable</a>)
+        {% endif %}
+        <form id="my-tag-form" class="form-inline" action="/" method="get">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon" id="my-tags-addon">my tags</span>
+                    <input class="tokenfield form-control" name="tags" type="text" placeholder="Enter comma separator tags here"
+                           aria-describedby="my-tags-addon"
+                           value="{{ current_user.tags and current_user.tags|join(",") or '' }}"/>
+                </div>
+                <button type="submit" class="btn btn-default">Save Tags</button
+            </div>
+        </form>
+        <form id="my-snippet-form" class="form-inline" action="/snippets" method="post">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon" id="my-snippet-addon">what's up?</span>
+                    <textarea class="form-control" name="snippet" type="text" placeholder="What's up?"
+                           aria-describedby="my-tags-addon"></textarea>
+                </div>
+                <button type="submit" class="btn btn-default">Submit Snippet</button
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            send your snippets to snippets@snippetless.appspotmail.com daily!
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            Preview your <a href="/snippets">digest</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+        <h3>Users</h3>
+        {% for user, following in all_users %}
+            <a href="/user/{{ user.email }}">{{ user.username }}</a>
+            {% if following %}
+                ✓ <a class="btn btn-default" role="button"
+                     href="/unfollow?user={{ user.email }}&continue=/">unfollow</a>
+            {% else %}
+                <a class="btn btn-default" role="button"
+                   href="/follow?user={{ user.email }}&continue=/">follow</a>
+            {% endif %}
+            <br/>
+        {% endfor %}
+        </div>
+        <div class="col-sm-6">
+        <h3>Tags</h3>
+        {% for tag, following in all_tags %}
+            <a href="/tag/{{ tag }}">{{ tag }}</a>
+            {% if following %}
+                ✓ <a class="btn btn-default" role="button"
+                     href="/unfollow?tag={{ tag }}&continue=/">unfollow</a>
+            {% else %}
+                <a class="btn btn-default" role="button"
+                   href="/follow?tag={{ tag }}&continue=/">follow</a>
+            {% endif %}
+            <br/>
+        {% endfor %}
+        </div>
+    </div>
+    <script>
+    $(document).ready(function() {
+        var form = $("#my-tag-form");
+        var tokenfields = $(".tokenfield");
+        /* tokenfields.on('tokenfield:initialize', function(e) {
+                    tokenfields.on('tokenfield:createdtoken', function(e) {
+                        form.submit();
+                    }).on('tokenfield:removedtoken', function(e) {
+                        form.submit();
+                    })
+                })
+                .tokenfield();*/
+        tokenfields.tokenfield();
+    })
+    </script>
+{% endblock %}
