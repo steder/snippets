@@ -8,25 +8,35 @@ import urllib
 # from google.appengine.ext.webapp import template
 # from google.appengine.ext.webapp import util
 
+import arrow
 from flask import Flask
 from flask import redirect
 from flask import render_template
 from flask import request
 from flask.ext.sqlalchemy import SQLAlchemy
-
+import sqlalchemy_utils
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.mutable import Mutable
+
 
 
 # from emails import (DigestEmail,
 #                     OneDigestEmail,
 #                     OneReminderEmail,
 #                     ReminderEmail)
-from dateutil import date_for_retrieval
 
 
 app = Flask(__name__)
 app.debug = True
+
+
+@app.template_filter()
+def timesince(dt):
+    """
+    Returns string representing "time since" e.g.
+    3 days ago, 5 hours ago etc.
+    """
+    return dt.humanize()
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/snippets'
@@ -61,7 +71,7 @@ class User(db.Model):
     tags = db.Column(MutableList.as_mutable(postgresql.ARRAY(db.String())), default=[])
     tags_following = db.Column(MutableList.as_mutable(postgresql.ARRAY(db.String())), default=[])
 
-    snippets = db.relationship('Snippet', backref='author', lazy='dynamic')
+    snippets = db.relationship('Snippet', backref='user', lazy='dynamic')
 
     def __init__(self, username, email):
         self.username = username
@@ -77,7 +87,7 @@ class Snippet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     text = db.Column(db.Text())
-    date = db.Column(db.DateTime())
+    date = db.Column(sqlalchemy_utils.ArrowType())
 
 
 def get_user(request):
@@ -107,16 +117,6 @@ def user_from_email(email):
     logging.debug('looking up user with email %s', email)
     return User.query.filter_by(email=email).first()
 
-#
-#
-# def create_or_replace_snippet(user, text, date):
-#     # Delete existing (yeah, yeah, should be a transaction)
-#     for existing in Snippet.all().filter("date =", date).filter("user =", user).fetch(10):
-#         existing.delete()
-#
-#     # Write new
-#     snippet = Snippet(text=text, user=user, date=date)
-#     snippet.put()
 
 # def authenticated(method):
 #     @functools.wraps(method)
@@ -213,7 +213,7 @@ def user_snippets(email):
     user = get_user(request)
     email = urllib.unquote_plus(email)
     desired_user = user_from_email(email)
-    snippets = desired_user.snippets
+    snippets = desired_user.snippets.limit(100)
     snippets = sorted(snippets, key=lambda s: s.date, reverse=True)
     following = email in user.following
     tags = [(t, t in user.tags_following) for t in desired_user.tags]
@@ -233,8 +233,8 @@ def user_snippets(email):
 def tag_snippets(tag):
     """View this week's snippets in a given tag."""
     user = get_user(request)
-    d = date_for_retrieval()
-    all_snippets = Snippet.query.filter_by(date=d).limit(500)
+    a_week_ago, now = arrow.utcnow().span("week")
+    all_snippets = Snippet.query.filter(Snippet.date >= a_week_ago).filter(Snippet.date < now).limit(500)
     if (tag != 'all'):
         all_snippets = [s for s in all_snippets if tag in s.user.tags]
     following = tag in user.tags_following
@@ -245,6 +245,15 @@ def tag_snippets(tag):
          'tag': tag
     }
     return render_template('tag.html', **template_values)
+
+
+@app.route("/snippets", methods=("POST",))
+@commit
+def create_snippet():
+    user = get_user(request)
+    s = Snippet(user_id=user.id, text=request.form['snippet'], date=arrow.utcnow())
+    db.session.add(s)
+    return redirect("/user/{}".format(user.email))
 
 
 # def main():

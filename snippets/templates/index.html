@@ -21,9 +21,21 @@
                 <button type="submit" class="btn btn-default">Save Tags</button
             </div>
         </form>
+        <form id="my-snippet-form" class="form-inline" action="/snippets" method="post">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon" id="my-snippet-addon">what's up?</span>
+                    <textarea class="form-control" name="snippet" type="text" placeholder="What's up?"
+                           aria-describedby="my-tags-addon"></textarea>
+                </div>
+                <button type="submit" class="btn btn-default">Submit Snippet</button
+            </div>
+        </form>
     </div>
     <div class="row">
-        send your snippets to snippets@snippetless.appspotmail.com daily!
+        <div class="col-sm-12">
+            send your snippets to snippets@snippetless.appspotmail.com daily!
+        </div>
     </div>
 
     <div class="row">
