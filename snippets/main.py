@@ -254,6 +254,7 @@ def get_digest():
 
     a_week_ago, now = arrow.utcnow().span("week")
     all_snippets = Snippet.query.filter(Snippet.date < now).filter(Snippet.date >= a_week_ago).limit(500)
+
     all_users = User.query.limit(500)
     following = compute_following(user, all_users)
     logging.info(all_snippets)
