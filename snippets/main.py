@@ -66,7 +66,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
     email = db.Column(db.String(120), unique=True)
-    enabled = db.Column(db.Boolean())
+    enabled = db.Column(db.Boolean(), default=True)
     following = db.Column(MutableList.as_mutable(postgresql.ARRAY(db.String(80))), default=[])
     tags = db.Column(MutableList.as_mutable(postgresql.ARRAY(db.String())), default=[])
     tags_following = db.Column(MutableList.as_mutable(postgresql.ARRAY(db.String())), default=[])
@@ -86,8 +86,8 @@ class Snippet(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    text = db.Column(db.Text())
-    date = db.Column(sqlalchemy_utils.ArrowType())
+    text = db.Column(db.Text()) # rename column to non-db type
+    date = db.Column(sqlalchemy_utils.ArrowType()) # rename column non-db type
 
 
 def get_user(request):
@@ -101,14 +101,12 @@ def get_user(request):
 def compute_following(current_user, users):
     """Return set of email addresses being followed by this user."""
     email_set = set(current_user.following)
-    print "email_set:", email_set
     tag_set = set(current_user.tags_following)
     following = set()
     for u in users:
         if ((u.email in email_set) or
                 (len(tag_set.intersection(u.tags)) > 0)):
             following.add(u.email)
-    print "following:", following
     return following
 
 
@@ -163,10 +161,13 @@ def index():
 
     all_tags = [(t, t in user.tags_following) for t in all_tags]
 
+    snippets = [s for s in Snippet.query.order_by(Snippet.date.desc()).limit(10)]
+
     template_values = {
         'current_user' : user,
         'all_users': all_users,
-        'all_tags': all_tags
+        'all_tags': all_tags,
+        'snippets': snippets,
     }
     return render_template('index.html', **template_values)
 
@@ -247,8 +248,8 @@ def tag_snippets(tag):
     return render_template('tag.html', **template_values)
 
 
-@app.route("/snippets")
-def show_snippets():
+@app.route("/snippets/digest")
+def get_digest():
     user = get_user(request)
 
     a_week_ago, now = arrow.utcnow().span("week")
@@ -256,13 +257,56 @@ def show_snippets():
     all_users = User.query.limit(500)
     following = compute_following(user, all_users)
     logging.info(all_snippets)
-    following_snippets = [s for s in all_snippets if s.user.email in following]
+    following_snippets = []
+    for s in all_snippets:
+        if s.user.email in following:
+            # include snippets by followed users
+            following_snippets.append(s)
+        else:
+            # include snippets containing tags
+            for tag in user.tags_following:
+                tag = tag.lower()
+                if tag in s.text.lower():
+                    following_snippets.append(s)
+                    break
 
     template_values = {
         "current_user": user,
         "following_snippets": following_snippets,
     }
     return render_template("snippet_digest.html", **template_values)
+
+
+@app.route("/snippets/<int:snippet_id>")
+def get_snippet(snippet_id):
+    user = get_user(request)
+
+    snippet = Snippet.query.filter(Snippet.id==snippet_id).first()
+
+    following = False
+    following_message = "You are not following this snippet"
+
+    print snippet.user.email, user.following, snippet.user.email in user.following
+
+    if snippet.user.email in user.following:
+        following = True
+        following_message = "You are following the user: {}".format(snippet.user.username)
+    else:
+        for tag in user.tags_following:
+            tag = tag.lower()
+            if tag in snippet.text.lower():
+                following = True
+                following_message = "You are following the tag: {}".format(tag)
+                break
+
+
+    template_values = {
+        "current_user": user,
+        "snippet": snippet,
+        "following": following,
+        "following_message": following_message,
+    }
+    return render_template("snippet.html", **template_values)
 
 
 @app.route("/snippets", methods=("POST",))

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+  <div style="float: left; width: 300px">
+    <h2>Snippet</h2>
+
+   <!-- TODO: Include a note about whether this update would be delivered to you normally
+        and why (due to following a tag it contains or due to following the author) -->
+  {%  if following: %}
+      Following: <p>{{ following_message }}</p>
+  {% else %}
+      <p>{{ following_message }}</p>
+  {%  endif %}
+
+  </div>
+  <div style="float: left; margin-left: 30px; max-width: 600px">
+      {{ snippet.date|timesince }} <b>{{ snippet.user.username }}</b> said<br/>
+      <pre>{{ snippet.text|urlize }}</pre>
+      <br/></br>
+  </div>
+
+{% endblock %}
