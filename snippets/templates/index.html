@@ -2,52 +2,45 @@
 
 {% block body %}
 
-    <div class="row">
-        <h2><a href="{{ url_for('user_snippets', email=current_user.email) }}">{{ current_user.username }}</a></h2>
-        currently
-        {% if current_user.enabled %}
-            enabled (<a class="light" href="?setenabled=0">disable</a>)
-        {% else %}
-            disabled (<a class="light" href="?setenabled=1">enable</a>)
-        {% endif %}
-        <form id="my-tag-form" class="form-inline" action="/" method="get">
-            <div class="form-group">
-                <div class="input-group">
-                    <span class="input-group-addon" id="my-tags-addon">my tags</span>
-                    <input class="tokenfield form-control" name="tags" type="text" placeholder="Enter comma separator tags here"
-                           aria-describedby="my-tags-addon"
-                           value="{{ current_user.tags and current_user.tags|join(",") or '' }}"/>
+    <div class="col-md-6 col-md-push-3">
+        <div class="row">
+            <h2><a href="{{ url_for('user_snippets', email=current_user.email) }}">{{ current_user.username }}</a></h2>
+            currently
+            {% if current_user.enabled %}
+                enabled (<a class="light" href="?setenabled=0">disable</a>)
+            {% else %}
+                disabled (<a class="light" href="?setenabled=1">enable</a>)
+            {% endif %}
+            <form id="my-snippet-form" action="/snippets" method="post">
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon" id="my-snippet-addon">what's up?</span>
+                        <textarea class="form-control" name="snippet" type="text" placeholder="What's up?"
+                                  aria-describedby="my-tags-addon"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Snippet</button>
                 </div>
-                <button type="submit" class="btn btn-default">Save Tags</button
-            </div>
-        </form>
-        <form id="my-snippet-form" class="form-inline" action="/snippets" method="post">
-            <div class="form-group">
-                <div class="input-group">
-                    <span class="input-group-addon" id="my-snippet-addon">what's up?</span>
-                    <textarea class="form-control" name="snippet" type="text" placeholder="What's up?"
-                           aria-describedby="my-tags-addon"></textarea>
-                </div>
-                <button type="submit" class="btn btn-default">Submit Snippet</button
-            </div>
-        </form>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <h3>Digest</h3>
-            Preview your <a href="{{ url_for('get_digest') }}">digest</a>
+            </form>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <h3>Email</h3>
-            send your snippets to snippets@snippetless.appspotmail.com daily!
+
+        <div class="row">
+            <h3>Most Recent Updates</h3>
+            {% for snippet in snippets %}
+                <!-- TODO: use url_for -->
+                <a href="/snippets/{{ snippet.id }}">
+                    <h4>{{ snippet.text|truncate(140) }}</h4>
+                </a>
+                <p>Posted by {{ snippet.user.username }} ({{ snippet.date|timesince }})</p>
+            {% else %}
+                <p>No updates... Yet!</p>
+            {% endfor %}
         </div>
+
     </div>
 
+    <div class="col-md-3 col-md-pull-6 col-sm-6">
+        <div class="row">
 
-    <div class="row">
-        <div class="col-sm-4">
         <h3>Users</h3>
         {% for user, following in all_users %}
             <a href="{{ url_for('user_snippets', email=user.email) }}">{{ user.username }}</a>
@@ -63,8 +56,31 @@
             <br/>
         {% endfor %}
         </div>
-        <div class="col-sm-4">
+
+        <div class="row">
+            <h3>Digest</h3>
+            Preview your <a href="{{ url_for('get_digest') }}">digest</a>
+        </div>
+
+        <div class="row">
+            <h3>Email</h3>
+            send your snippets to snippets@snippetless.appspotmail.com daily!
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
         <h3>Tags</h3>
+        <form id="my-tag-form" class="form-inline" action="/" method="get">
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon" id="my-tags-addon">my tags</span>
+                        <input class="tokenfield form-control" name="tags" type="text" placeholder="Enter comma separator tags here"
+                               aria-describedby="my-tags-addon"
+                               value="{{ current_user.tags and current_user.tags|join(",") or '' }}"/>
+                    </div>
+                    <button type="submit" class="btn btn-default">Save Tags</button>
+                </div>
+            </form>
         {% for tag, following in all_tags %}
             <!-- TODO: use url_for -->
             <a href="/tag/{{ tag }}">{{ tag }}</a>
@@ -77,20 +93,8 @@
             {% endif %}
             <br/>
         {% endfor %}
-        </div>
-        <div class="col-sm-4">
-            <h3>Most Recent Updates</h3>
-            {% for snippet in snippets %}
-                <!-- TODO: use url_for -->
-                <a href="/snippets/{{ snippet.id }}">
-                    <h4>{{ snippet.text|truncate(140) }}</h4>
-                </a>
-                <p>Posted by {{ snippet.user.username }} ({{ snippet.date|timesince }})</p>
-            {% else %}
-                <p>No updates... Yet!</p>
-            {% endfor %}
-        </div>
     </div>
+
     <script>
     $(document).ready(function() {
         var form = $("#my-tag-form");
