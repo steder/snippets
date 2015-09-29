@@ -13,6 +13,12 @@
         {% for snippet in following_snippets %}
             <li>
                 {{ snippet.text }} <b>{{ snippet.user.username }}</b> <i>{{ snippet.date|timesince }}</i>
+                {% for tag in snippet.tags %}
+                    <strong><span class="label label-info">{{ tag }}</span></strong>
+                {% else %}
+                    <span class="label label-info">{{ snippet.user.username }}</span>
+
+                {% endfor %}
             </li>
         {% else %}
             <li>

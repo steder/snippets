@@ -5,12 +5,14 @@
     <div class="col-md-6 col-md-push-3">
         <div class="row">
             <h2><a href="{{ url_for('user_snippets', email=current_user.email) }}">{{ current_user.username }}</a></h2>
+            <!-- TODO: figure out what we want to use user.enabled for here or if we should just remove it entirely
             currently
             {% if current_user.enabled %}
                 enabled (<a class="light" href="?setenabled=0">disable</a>)
             {% else %}
                 disabled (<a class="light" href="?setenabled=1">enable</a>)
             {% endif %}
+            -->
             <form id="my-snippet-form" action="/snippets" method="post">
                 <div class="form-group">
                     <div class="input-group">
